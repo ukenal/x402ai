@@ -1,122 +1,48 @@
 # x402ai
 
-AI microservices monetized via the [x402 payment protocol](https://x402.org) — pay-per-request with on-chain USDC, no accounts, no API keys, no KYC.
+Self-hosted, payment-gated AI inference microservices on Base mainnet, built on
+the x402 protocol. Machines pay machines at the API layer — no accounts, no API
+keys, no KYC.
 
-Live at **`api.x402ai.dev`** · Base mainnet
+**Live:** https://api.x402ai.dev · https://x402ai.dev
+**Registered on x402scan:** https://tryponcho.com/m/api.x402ai.dev
 
----
+## What it is
 
-## Overview
+Three inference endpoints behind an HTTP 402 payment wall. An agent or developer
+sends a signed USDC authorization on Base and gets a result back — no signup
+flow, no key management.
 
-x402ai exposes a set of AI inference endpoints behind a native HTTP 402 payment wall. Each request is individually priced and settled on-chain via EIP-3009 token authorization. The service is self-hosted on a home server and served publicly through a Cloudflare Zero Trust tunnel.
+| Endpoint | Model | Price |
+|---|---|---|
+| `POST /api/embed` | nomic-embed-text | $0.01 |
+| `POST /api/summarize` | qwen3.5-nothink:2b | $0.02 |
+| `POST /api/ask` | qwen3.5-nothink:2b | $0.04 |
 
-Pricing is fixed per endpoint. Live prices are always available at `GET /health`.
-
----
-
-## Endpoints
-
-| Method | Path | Model | Price | Latency (warm) | Description |
-|--------|------|-------|-------|----------------|-------------|
-| `POST` | `/api/embed` | `nomic-embed-text` | $0.01 | ~370ms | Text embedding — 768-dimensional vectors |
-| `POST` | `/api/summarize` | `qwen3.5-nothink:2b` | $0.02 | ~8s | Text summarization |
-| `POST` | `/api/ask` | `qwen3.5-nothink:2b` | $0.04 | ~7s | Single-turn Q&A |
-| `GET` | `/health` | — | free | — | Service status and live pricing |
-
----
-
-## Payment Flow
-
-x402ai implements the [x402 protocol](https://x402.org) over standard HTTP. No wallet registration or pre-authorization required.
-
-```
-Client                          Server                        Facilitator (Coinbase CDP)
-  │                               │                                    │
-  │  POST /api/embed              │                                    │
-  │ ─────────────────────────────►│                                    │
-  │                               │                                    │
-  │  402 Payment Required         │                                    │
-  │  X-Payment-Details: { price,  │                                    │
-  │    network, recipient, ... }  │                                    │
-  │◄─────────────────────────────-│                                    │
-  │                               │                                    │
-  │  [client signs EIP-3009       │                                    │
-  │   transferWithAuthorization]  │                                    │
-  │                               │                                    │
-  │  POST /api/embed              │                                    │
-  │  X-Payment: <signed payload>  │                                    │
-  │ ─────────────────────────────►│                                    │
-  │                               │  verify + settle on-chain         │
-  │                               │ ──────────────────────────────────►│
-  │                               │                                    │
-  │                               │  settlement confirmed              │
-  │                               │◄───────────────────────────────────│
-  │                               │                                    │
-  │  200 OK + inference result    │                                    │
-  │◄──────────────────────────────│                                    │
-```
-
-**Key properties:**
-- Each request carries its own signed payment authorization
-- The Coinbase CDP facilitator verifies and settles the USDC transfer on-chain
-- No session state, no subscriptions, no trust required from the client
-
----
-
-## Architecture
-
-```
-                    ┌─────────────────────────────────────┐
-                    │         api.x402ai.dev               │
-                    │   Cloudflare Zero Trust Tunnel       │
-                    └──────────────────┬──────────────────┘
-                                       │ HTTPS
-                    ┌──────────────────▼──────────────────┐
-                    │         Hono (Node.js)               │
-                    │         x402-hono middleware         │
-                    │                                      │
-                    │   /api/embed  →  Ollama              │
-                    │   /api/summarize  →  Ollama          │
-                    │   /api/ask  →  Ollama                │
-                    │   /health  →  status + pricing       │
-                    └──────────────────┬──────────────────┘
-                                       │
-                    ┌──────────────────▼──────────────────┐
-                    │              Ollama                  │
-                    │   nomic-embed-text (768-dim)         │
-                    │   qwen3.5-nothink:2b                 │
-                    └─────────────────────────────────────┘
-
-                    Hardware: Dell Precision, Intel i7-6700
-```
-
-Payment settlement runs on **Base mainnet** via the Coinbase CDP facilitator.
-
----
+Discovery: `/openapi.json` (OpenAPI 3.1) and `/.well-known/x402`.
 
 ## Stack
 
-| Component | Role |
-|-----------|------|
-| [Hono](https://hono.dev) | HTTP framework |
-| [x402-hono](https://github.com/coinbase/x402) | 402 payment middleware |
-| [Ollama](https://ollama.com) | Local model inference runtime |
-| `nomic-embed-text` | Text embedding model |
-| `qwen3.5-nothink:2b` | Text generation model |
-| [Coinbase CDP](https://cdp.coinbase.com) | On-chain payment facilitator |
-| [Base](https://base.org) | EVM L2 mainnet (USDC) |
-| Cloudflare Zero Trust | Tunnel + edge security |
+- **Protocol:** x402 V2 (`@x402/hono`, `@x402/core`, `@x402/evm`), header-based
+  payment challenge, network `eip155:8453` (Base mainnet)
+- **Facilitator:** Coinbase CDP
+- **Settlement:** real USDC on Base, `exact` scheme
+- **Runtime:** Hono (Node.js) + Ollama for local inference
+- **Infra:** self-hosted homelab server, served via Cloudflare Zero Trust tunnel
 
----
+## Status
 
-## Why x402?
+- Live on Base mainnet since April 2026
+- Migrated to x402 V2 in July 2026 (from the original x402-hono V1 middleware)
+- Registered and discoverable on x402scan
 
-HTTP 402 ("Payment Required") has been reserved since 1996 but never standardized. The x402 protocol finally makes it practical: a server returns a 402 with machine-readable payment instructions, the client signs an EIP-3009 authorization over the exact amount, and a facilitator settles it on-chain. The server only processes the request after settlement is confirmed.
+The code that runs this service lives on private infrastructure; this repo
+documents the architecture and stack for anyone evaluating the work.
 
-The result is a fully permissionless API economy — no OAuth, no billing dashboards, no rate-limit tiers. Just sign and pay.
+x402ai is one piece of a broader line of work in agent-native, machine-to-machine
+commerce — building the payment and infrastructure layer that lets autonomous
+agents transact directly with services and each other.
 
----
+## Contact
 
-## License
-
-MIT
+Landy Ukena — [LinkedIn](https://www.linkedin.com/in/landyukena/)

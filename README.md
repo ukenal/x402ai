@@ -34,6 +34,7 @@ Discovery: `/openapi.json` (OpenAPI 3.1) and `/.well-known/x402`.
 
 - Live on Base mainnet since April 2026
 - Migrated to x402 V2 in July 2026 (from the original x402-hono V1 middleware)
+  [migration guide here](https://github.com/ukenal/x402-v1-to-v2-migration)
 - Registered and discoverable on x402scan
 
 The code that runs this service lives on private infrastructure; this repo
@@ -42,6 +43,13 @@ documents the architecture and stack for anyone evaluating the work.
 x402ai is one piece of a broader line of work in agent-native, machine-to-machine
 commerce — building the payment and infrastructure layer that lets autonomous
 agents transact directly with services and each other.
+
+## Migration notes
+
+Moving a service from x402 V1 to V2? I documented the whole process — the
+undocumented gotchas, working code from this service, and a checklist:
+
+**→ [x402 V1 → V2 Migration Guide](https://github.com/ukenal/x402-v1-to-v2-migration)**
 
 ## Contact
 

@@ -51,6 +51,12 @@ undocumented gotchas, working code from this service, and a checklist:
 
 **→ [x402 V1 → V2 Migration Guide](https://github.com/ukenal/x402-v1-to-v2-migration)**
 
+## Notes
+
+- [Upgrading within V2](docs/upgrading-within-v2.md)
+- [Getting indexed in the Coinbase CDP Bazaar](docs/bazaar-indexing.md)
+- [Changelog](CHANGELOG.md)
+
 ## Contact
 
 Landy Ukena — [LinkedIn](https://www.linkedin.com/in/landyukena/)

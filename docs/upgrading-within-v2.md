@@ -181,7 +181,7 @@ git checkout pre-x402-2.28 -- package.json package-lock.json && npm ci --legacy-
 
 ## Observations
 
-- **Two extension-response lines per payment.** After the upgrade my logs show the Bazaar extension response twice per payment, once before the handler runs and once after, where I used to see one. I believe it comes from the 2.25.0 change that populates extension responses on verify as well as settle, but I haven't confirmed that in the source. It matters only if you parse those log lines and expect one per payment.
+- **Two extension-response lines per payment.** My service logs the Bazaar extension response twice for each paid call, once before the handler runs and once after. I believe these are the verify and settle steps, but I haven't confirmed that in the source. This was the same on 2.19.0, so it isn't a change from the upgrade. It matters only if you parse those log lines and expect one per payment.
 - **Startup failures.** Because 2.25.0 can exit the process on a permanent sync error, a startup promise without a `.catch` will crash with a bare unhandled rejection. Mine currently has none. Adding one that logs a clear message is a small separate change.
 - **What this didn't cover.** I did not read the 2.28.0 source for validation changes to route-level fields such as `serviceName` and `tags`. After the upgrade my listing name, tags and descriptions were intact in the Bazaar catalog, which is the check that matters in practice.
 

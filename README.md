@@ -4,8 +4,9 @@ Self-hosted, payment-gated AI inference microservices on Base mainnet, built on
 the x402 protocol. Machines pay machines at the API layer — no accounts, no API
 keys, no KYC.
 
-**Live:** https://api.x402ai.dev · https://x402ai.dev
-**Registered on x402scan:** https://tryponcho.com/m/api.x402ai.dev
+**Live:** <https://api.x402ai.dev> · <https://x402ai.dev>
+
+**Registered on x402scan:** <https://tryponcho.com/m/api.x402ai.dev>
 
 ## What it is
 
@@ -19,11 +20,11 @@ flow, no key management.
 | `POST /api/summarize` | qwen3.5-nothink:2b | $0.02 |
 | `POST /api/ask` | qwen3.5-nothink:2b | $0.04 |
 
-Discovery: `/openapi.json` (OpenAPI 3.1) and `/.well-known/x402`.
+Discovery: `/openapi.json` (OpenAPI 3.1) and the Coinbase CDP Bazaar listing.
 
 ## Stack
 
-- **Protocol:** x402 V2 (`@x402/hono`, `@x402/core`, `@x402/evm`), header-based
+- **Protocol:** x402 V2 (`@x402/hono`, `@x402/core`, `@x402/evm`, `@x402/extensions`, all at 2.28.0), header-based
   payment challenge, network `eip155:8453` (Base mainnet)
 - **Facilitator:** Coinbase CDP
 - **Settlement:** real USDC on Base, `exact` scheme
@@ -36,6 +37,7 @@ Discovery: `/openapi.json` (OpenAPI 3.1) and `/.well-known/x402`.
 - Migrated to x402 V2 in July 2026 (from the original x402-hono V1 middleware)
   [migration guide here](https://github.com/ukenal/x402-v1-to-v2-migration)
 - Registered and discoverable on x402scan
+- Indexed in the Coinbase CDP Bazaar since late September 2026
 
 The code that runs this service lives on private infrastructure; this repo
 documents the architecture and stack for anyone evaluating the work.

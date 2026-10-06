@@ -150,9 +150,16 @@ Two things from my own data, each a single snapshot:
 - **Descriptions moved rank; tags alone did not.** After I rewrote descriptions and added tags, my embeddings route went from #13 to #3 and my summarize route from #9 to #4 on searches that echoed their descriptions. A bare one-word tag query like "llm" did not surface my routes. Recency and relevance changed together, so I can't separate the two effects. The practical lesson is to write descriptions the way a buyer would phrase the search.
 - **Metadata is cheap hygiene, not a growth lever.** In the catalog data I analyzed, traffic was concentrated in a handful of services, and neither tags nor enrichment appeared to gate it. That's my reading of one catalog snapshot.
 
+## Reported issues I haven't reproduced
+
+- [coinbase/cdp-sdk#833](https://github.com/coinbase/cdp-sdk/issues/833): a seller reports that a settled Base mainnet payment never showed up in discovery. The suspected cause is the indexer treating Base as a v1 network and discarding v2 `extensions.bazaar` metadata. It is said to repeat x402 issue #1982. My own routes indexed fine on Base mainnet, so it may not affect every seller.
+- [coinbase/cdp-sdk#838](https://github.com/coinbase/cdp-sdk/issues/838): a seller meeting the published curation criteria reports being stuck unlisted on agentic.market for more than 7 weeks.
+
+I'm linking these as reports. I haven't reproduced either.
 
 ## Other observations
 
+- **The counters undercount.** I found a one-cent payment from a third-party wallet, made a few days before the upgrade, that the route's payer counter doesn't include. I don't know why. Treat the catalog's payer counts as a lower bound, and cross-check against a block explorer when you want to know who actually paid you.
 - **The counters lag.** Payments I made minutes earlier were not in the 30-day counters yet. Check again hours later.
 - **`processing` is not a failure.** It was the only verdict I ever got, across every settlement.
 - **The validator proves eligibility, not listing.** Always confirm with the merchant lookup.
